@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N5漢字学習アプリ - 音声付き</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, 
+ 0%, 
+ 50%, 
+ 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: gradientShift 10s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+            border: 3px solid #fff;
+        }
+        
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .kanji-card {
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .kanji-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .kanji-display {
+            font-size: 140px;
+            color: 
+;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .kanji-display:hover {
+            transform: scale(1.1);
+            color: 
+;
+        }
+        
+        .kanji-info {
+            margin: 15px 0;
+        }
+        
+        .label {
+            font-weight: bold;
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .reading {
+            font-size: 26px;
+            color: 
+;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .meaning {
+            font-size: 22px;
+            color: 
+;
+            margin-top: 15px;
+            background: 
+;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 5px solid 
+;
+        }
+        
+        .example {
+            font-size: 19px;
+            color: 
+;
+            margin-top: 15px;
+            padding: 18px;
+            background: 
+;
+            border-radius: 12px;
+            border-left: 5px solid 
+;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            color: white;
+        }
+        
+        .btn-next:hover {
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+        }
+        
+        .btn-random {
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            color: white;
+        }
+        
+        .btn-random:hover {
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+            transform: translateY(-3px);
+        }
+        
+        .btn-audio {
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            color: white;
+            font-size: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .btn-audio:hover {
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+            transform: translateY(-3px) rotate(15deg);
+        }
+        
+        .progress {
+            text-align: center;
+            color: 
+;
+            font-size: 20px;
+            margin-top: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .kanji-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .kanji-item {
+            padding: 15px;
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+        
+        .kanji-item:hover {
+            background: linear-gradient(135deg, 
+ 0%, 
+ 100%);
+            color: white;
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .toggle-list {
+            background: linear-gradient(135deg, 
+ 0%, 
+
+ 100%);
+            color: white;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .toggle-list:hover {
+            box-shadow: 0 8px 20px rgba(67, 233, 123, 0.4);
+            transform: translateY(-3px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .playing {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎌 N5 漢字学習アプリ 🔊</h1>
+        
+        <div class="kanji-card">
+            <div class="kanji-display" id="kanjiDisplay" onclick="speakKanji()">一</div>
+            <div class="kanji-info">
+                <div class="reading">
+                    <span class="label">📖 読み方:</span>
+                    <span id="reading">いち、イチ、ひと(つ)</span>
+                </div>
+                <div class="meaning">
+                    <span class="label">🌍 意味:</span>
+                    <span id="meaning">one</span>
+                </div>
+                <div class="example">
+                    <span class="label">✏️ 例:</span>
+                    <span id="example">一人 (ひとり) - one person</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="audio-controls">
+            <button class="btn-audio" onclick="speakKanji()" title="漢字を読む">🔊</button>
+            <button class="btn-audio" onclick="speakReading()" title="読み方を読む">📢</button>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-next" onclick="nextKanji()">次へ →</button>
+            <button class="btn-random" onclick="randomKanji()">ランダム 🎲</button>
+        </div>
+        
+        <div class="progress" id="progress">1 / 80</div>
+        
+        <button class="toggle-list" onclick="toggleList()">📚 漢字リストを表示/非表示</button>
+        
+        <div class="kanji-list hidden" id="kanjiList"></div>
+    </div>
+
+    <script>
+        // N5レベルの漢字データ（80字）
+        const kanjiData = [
+            { kanji: "一", reading: "いち、イチ、ひと(つ)", meaning: "one", example: "一人 (ひとり) - one person" },
+            { kanji: "二", reading: "に、ニ、ふた(つ)", meaning: "two", example: "二人 (ふたり) - two people" },
+            { kanji: "三", reading: "さん、サン、み(つ)", meaning: "three", example: "三日 (みっか) - three days" },
+            { kanji: "四", reading: "し、よん、よ(つ)", meaning: "four", example: "四月 (しがつ) - April" },
+            { kanji: "五", reading: "ご、ゴ、いつ(つ)", meaning: "five", example: "五時 (ごじ) - five o'clock" },
+            { kanji: "六", reading: "ろく、ロク、む(つ)", meaning: "six", example: "六月 (ろくがつ) - June" },
+            { kanji: "七", reading: "しち、なな、なの", meaning: "seven", example: "七日 (なのか) - seven days" },
+            { kanji: "八", reading: "はち、ハチ、や(つ)", meaning: "eight", example: "八百屋 (やおや) - vegetable shop" },
+            { kanji: "九", reading: "きゅう、く、ここの(つ)", meaning: "nine", example: "九時 (くじ) - nine o'clock" },
+            { kanji: "十", reading: "じゅう、ジュウ、とお", meaning: "ten", example: "十日 (とおか) - ten days" },
+            { kanji: "百", reading: "ひゃく、ビャク", meaning: "hundred", example: "百円 (ひゃくえん) - 100 yen" },
+            { kanji: "千", reading: "せん、セン、ち", meaning: "thousand", example: "千円 (せんえん) - 1000 yen" },
+            { kanji: "万", reading: "まん、マン", meaning: "ten thousand", example: "一万円 (いちまんえん) - 10,000 yen" },
+            { kanji: "円", reading: "えん、エン、まる(い)", meaning: "yen, circle", example: "百円 (ひゃくえん) - 100 yen" },
+            { kanji: "日", reading: "にち、ひ、か", meaning: "day, sun", example: "今日 (きょう) - today" },
+            { kanji: "月", reading: "げつ、がつ、つき", meaning: "month, moon", example: "一月 (いちがつ) - January" },
+            { kanji: "火", reading: "か、ひ", meaning: "fire, Tuesday", example: "火曜日 (かようび) - Tuesday" },
+            { kanji: "水", reading: "すい、みず", meaning: "water, Wednesday", example: "水曜日 (すいようび) - Wednesday" },
+            { kanji: "木", reading: "もく、き", meaning: "tree, Thursday", example: "木曜日 (もくようび) - Thursday" },
+            { kanji: "金", reading: "きん、かね", meaning: "gold, money, Friday", example: "金曜日 (きんようび) - Friday" },
+            { kanji: "土", reading: "ど、つち", meaning: "soil, Saturday", example: "土曜日 (どようび) - Saturday" },
+            { kanji: "年", reading: "ねん、とし", meaning: "year", example: "今年 (ことし) - this year" },
+            { kanji: "時", reading: "じ、とき", meaning: "time, hour", example: "三時 (さんじ) - three o'clock" },
+            { kanji: "分", reading: "ふん、ぶん、わ(かる)", meaning: "minute, understand", example: "十分 (じゅっぷん) - ten minutes" },
+            { kanji: "半", reading: "はん、なか(ば)", meaning: "half", example: "三時半 (さんじはん) - 3:30" },
+            { kanji: "人", reading: "じん、にん、ひと", meaning: "person", example: "日本人 (にほんじん) - Japanese person" },
+            { kanji: "男", reading: "だん、おとこ", meaning: "man, male", example: "男の人 (おとこのひと) - man" },
+            { kanji: "女", reading: "じょ、おんな", meaning: "woman, female", example: "女の人 (おんなのひと) - woman" },
+            { kanji: "子", reading: "し、こ", meaning: "child", example: "子供 (こども) - child" },
+            { kanji: "学", reading: "がく、まな(ぶ)", meaning: "study, learn", example: "学生 (がくせい) - student" },
+            { kanji: "生", reading: "せい、い(きる)", meaning: "life, birth", example: "先生 (せんせい) - teacher" },
+            { kanji: "先", reading: "せん、さき", meaning: "before, ahead", example: "先週 (せんしゅう) - last week" },
+            { kanji: "校", reading: "こう", meaning: "school", example: "学校 (がっこう) - school" },
+            { kanji: "本", reading: "ほん、もと", meaning: "book, origin", example: "日本 (にほん) - Japan" },
+            { kanji: "語", reading: "ご、かた(る)", meaning: "language, word", example: "日本語 (にほんご) - Japanese language" },
+            { kanji: "文", reading: "ぶん、もん、ふみ", meaning: "sentence, text", example: "文字 (もじ) - letter, character" },
+            { kanji: "字", reading: "じ、あざ", meaning: "character, letter", example: "漢字 (かんじ) - kanji" },
+            { kanji: "名", reading: "めい、な", meaning: "name", example: "名前 (なまえ) - name" },
+            { kanji: "前", reading: "ぜん、まえ", meaning: "before, front", example: "午前 (ごぜん) - morning, AM" },
+            { kanji: "後", reading: "ご、あと、うし(ろ)", meaning: "after, behind", example: "午後 (ごご) - afternoon, PM" },
+            { kanji: "上", reading: "じょう、うえ、あ(がる)", meaning: "up, above", example: "上手 (じょうず) - skillful" },
+            { kanji: "下", reading: "か、げ、した、お(りる)", meaning: "down, below", example: "下手 (へた) - unskillful" },
+            { kanji: "中", reading: "ちゅう、なか", meaning: "middle, inside", example: "中国 (ちゅうごく) - China" },
+            { kanji: "外", reading: "がい、そと", meaning: "outside", example: "外国 (がいこく) - foreign country" },
+            { kanji: "内", reading: "ない、うち", meaning: "inside", example: "家内 (かない) - wife" },
+            { kanji: "左", reading: "さ、ひだり", meaning: "left", example: "左手 (ひだりて) - left hand" },
+            { kanji: "右", reading: "う、みぎ", meaning: "right", example: "右手 (みぎて) - right hand" },
+            { kanji: "東", reading: "とう、ひがし", meaning: "east", example: "東京 (とうきょう) - Tokyo" },
+            { kanji: "西", reading: "せい、にし", meaning: "west", example: "西口 (にしぐち) - west exit" },
+            { kanji: "南", reading: "なん、みなみ", meaning: "south", example: "南口 (みなみぐち) - south exit" },
+            { kanji: "北", reading: "ほく、きた", meaning: "north", example: "北海道 (ほっかいどう) - Hokkaido" },
+            { kanji: "大", reading: "だい、おお(きい)", meaning: "big, large", example: "大学 (だいがく) - university" },
+            { kanji: "小", reading: "しょう、ちい(さい)", meaning: "small, little", example: "小学校 (しょうがっこう) - elementary school" },
+            { kanji: "高", reading: "こう、たか(い)", meaning: "high, tall", example: "高校 (こうこう) - high school" },
+            { kanji: "安", reading: "あん、やす(い)", meaning: "cheap, peaceful", example: "安い (やすい) - cheap" },
+            { kanji: "新", reading: "しん、あたら(しい)", meaning: "new", example: "新聞 (しんぶん) - newspaper" },
+            { kanji: "古", reading: "こ、ふる(い)", meaning: "old", example: "古い (ふるい) - old" },
+            { kanji: "長", reading: "ちょう、なが(い)", meaning: "long, chief", example: "長い (ながい) - long" },
+            { kanji: "多", reading: "た、おお(い)", meaning: "many, much", example: "多い (おおい) - many" },
+            { kanji: "少", reading: "しょう、すく(ない)", meaning: "few, little", example: "少ない (すくない) - few" },
+            { kanji: "白", reading: "はく、しろ(い)", meaning: "white", example: "白い (しろい) - white" },
+            { kanji: "赤", reading: "せき、あか(い)", meaning: "red", example: "赤い (あかい) - red" },
+            { kanji: "青", reading: "せい、あお(い)", meaning: "blue", example: "青い (あおい) - blue" },
+            { kanji: "山", reading: "さん、やま", meaning: "mountain", example: "富士山 (ふじさん) - Mt. Fuji" },
+            { kanji: "川", reading: "せん、かわ", meaning: "river", example: "川 (かわ) - river" },
+            { kanji: "天", reading: "てん、あま", meaning: "heaven, sky", example: "天気 (てんき) - weather" },
+            { kanji: "気", reading: "き、け", meaning: "spirit, air", example: "元気 (げんき) - healthy, energetic" },
+            { kanji: "雨", reading: "う、あめ", meaning: "rain", example: "雨 (あめ) - rain" },
+            { kanji: "電", reading: "でん", meaning: "electricity", example: "電車 (でんしゃ) - train" },
+            { kanji: "車", reading: "しゃ、くるま", meaning: "car, vehicle", example: "車 (くるま) - car" },
+            { kanji: "駅", reading: "えき", meaning: "station", example: "駅 (えき) - station" },
+            { kanji: "店", reading: "てん、みせ", meaning: "shop, store", example: "店 (みせ) - shop" },
+            { kanji: "食", reading: "しょく、た(べる)", meaning: "eat, food", example: "食べる (たべる) - to eat" },
+            { kanji: "飲", reading: "いん、の(む)", meaning: "drink", example: "飲む (のむ) - to drink" },
+            { kanji: "見", reading: "けん、み(る)", meaning: "see, look", example: "見る (みる) - to see" },
+            { kanji: "聞", reading: "ぶん、き(く)", meaning: "hear, listen", example: "聞く (きく) - to hear" },
+            { kanji: "読", reading: "どく、よ(む)", meaning: "read", example: "読む (よむ) - to read" },
+            { kanji: "書", reading: "しょ、か(く)", meaning: "write", example: "書く (かく) - to write" },
+            { kanji: "話", reading: "わ、はな(す)", meaning: "speak, talk", example: "話す (はなす) - to speak" }
+        ];
+
+        let currentIndex = 0;
+
+        // Web Speech API の設定
+        const synth = window.speechSynthesis;
+        let japaneseVoice = null;
+
+        // 日本語音声の取得
+        function loadVoices() {
+            const voices = synth.getVoices();
+            japaneseVoice = voices.find(voice => voice.lang === 'ja-JP') || voices[0];
+        }
+
+        // 音声が読み込まれるまで待つ
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+
+        // 初期表示
+        displayKanji(currentIndex);
+        createKanjiList();
+
+        function displayKanji(index) {
+            const kanji = kanjiData[index];
+            document.getElementById('kanjiDisplay').textContent = kanji.kanji;
+            document.getElementById('reading').innerHTML = `<span class="label">📖 読み方:</span> ${kanji.reading}`;
+            document.getElementById('meaning').innerHTML = `<span class="label">🌍 意味:</span> ${kanji.meaning}`;
+            document.getElementById('example').innerHTML = `<span class="label">✏️ 例:</span> ${kanji.example}`;
+            document.getElementById('progress').textContent = `${index + 1} / ${kanjiData.length}`;
+        }
+
+        function speakKanji() {
+            const kanji = kanjiData[currentIndex].kanji;
+            speak(kanji);
+            animateKanji();
+        }
+
+        function speakReading() {
+            const reading = kanjiData[currentIndex].reading.split('、')[0]; // 最初の読み方を使用
+            speak(reading);
+        }
+
+        function speak(text) {
+            // 既存の音声を停止
+            synth.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.8; // ゆっくり読む
+            utterance.pitch = 1.0;
+            
+            if (japaneseVoice) {
+                utterance.voice = japaneseVoice;
+            }
+            
+            synth.speak(utterance);
+        }
+
+        function animateKanji() {
+            const kanjiDisplay = document.getElementById('kanjiDisplay');
+            kanjiDisplay.classList.add('playing');
+            setTimeout(() => {
+                kanjiDisplay.classList.remove('playing');
+            }, 1000);
+        }
+
+        function nextKanji() {
+            currentIndex = (currentIndex + 1) % kanjiData.length;
+            displayKanji(currentIndex);
+            speakKanji(); // 自動で音声再生
+        }
+
+        function randomKanji() {
+            currentIndex = Math.floor(Math.random() * kanjiData.length);
+            displayKanji(currentIndex);
+            speakKanji(); // 自動で音声再生
+        }
+
+        function createKanjiList() {
+            const listContainer = document.getElementById('kanjiList');
+            kanjiData.forEach((item, index) => {
+                const kanjiItem = document.createElement('div');
+                kanjiItem.className = 'kanji-item';
+                kanjiItem.textContent = item.kanji;
+                kanjiItem.onclick = () => {
+                    currentIndex = index;
+                    displayKanji(currentIndex);
+                    speakKanji();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+                listContainer.appendChild(kanjiItem);
+            });
+        }
+
+        function toggleList() {
+            const list = document.getElementById('kanjiList');
+            list.classList.toggle('hidden');
+        }
+
+        // キーボードショートカット
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextKanji();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + kanjiData.length) % kanjiData.length;
+                displayKanji(currentIndex);
+                speakKanji();
+            } else if (e.key === 'r' || e.key === 'R') {
+                randomKanji();
+            } else if (e.key === 's' || e.key === 'S') {
+                speakKanji();
+            }
+        });
+    </script>
+</body>
+</html>
